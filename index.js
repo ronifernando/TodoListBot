@@ -6,22 +6,20 @@ const config = require('./config.js');
 const database = require('./db.js');
 
 const dbConnection = commons.createDbPool(config.mySqlInfo);
-
 const token = config.token;
 
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, {polling: true});
 
-
+//Test Command Code
 bot.onText(/\/echo (.+)/, (msg, match) => {
-
-
   const chatId = msg.chat.id;
   const resp = match[1]; 
 
   bot.sendMessage(chatId, resp);
 });
 
+//Start Command
 bot.onText(/\/start/, (msg, match) => {
   bot.sendMessage(msg.chat.id, 
     "Welcome\n" +
@@ -31,6 +29,15 @@ bot.onText(/\/start/, (msg, match) => {
     );
 });
 
+/**
+ * Addtodo Command
+ * /addtodo date/datetime#title#desc
+ * @param date Date(1999-9-9)
+ * @param datetime DateTime(1999-9-9 23:59:59)
+ * @param title Todo Title
+ * @param desc Todo Description
+ * @return Succes or fail Message,
+ */
 bot.onText(/\/addtodo (.+)/, (msg, match) => {
   let text = match[1];
   console.log('Splitting String ' + text);
@@ -54,6 +61,15 @@ bot.onText(/\/addtodo (.+)/, (msg, match) => {
   }
 });
 
+/**
+ * Mytodo Command
+ * /mytodo all/today/tomorrow/date
+ * @param all Show all task on user todo list
+ * @param today Show today task on user todo list
+ * @param tomorrow Show tomorrow task on user todo list
+ * @param date Show task on user todo list with specific date(1999-9-9)
+ * @return list of todo list,
+ */
 bot.onText(/\/mytodo (.+)/,(msg, match) => {
   console.log('Splitting String ' + match[1]);
   database.getMyTodoList(dbConnection, msg.chat.id, (res) => {
@@ -138,6 +154,16 @@ bot.onText(/\/mytodo (.+)/,(msg, match) => {
   });
 });
 
+/**
+ * TodoDetail Command
+ * /tododetail all/today/tomorrow/date#number
+ * @param all Show all task on user todo list
+ * @param today Show today task on user todo list
+ * @param tomorrow Show tomorrow task on user todo list
+ * @param date Show task on user todo list with specific date(1999-9-9)
+ * @param number Todo task number wants to show details
+ * @return Detail of todo list,
+ */
 bot.onText(/\/tododetail (.+)/,(msg, match) => {
   match = match[1].split("#");
   switch(match[0].toLocaleLowerCase()){
@@ -218,8 +244,11 @@ bot.onText(/\/tododetail (.+)/,(msg, match) => {
   }
 });
 
-
-function alertstart(){
+/**
+ * reminder function
+ * will send a reminder message to user with contain today todo list.
+ */
+function reminderstart(){
   //console.log("check todo list");
   let now = new Date();
   let alerttime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0, 0) - now;
@@ -260,11 +289,11 @@ function alertstart(){
   
       bot.sendMessage(261018396, "Your Todo List " + text) //optional {reply_markup: reply, reply_to_message_id: msg.message_id}
     });
-    alertstart();
+    reminderstart();
   },alerttime);
 };
 
-alertstart();
+reminderstart();
 /*
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
